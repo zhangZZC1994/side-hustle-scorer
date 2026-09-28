@@ -3,7 +3,7 @@
 > 8 个维度加权打分，30 秒判断一个副业值不值得做。
 > 免费、无需注册、数据不上传。
 
-**[打开免费在线工具 →](https://YOUR_USERNAME.github.io/side-hustle-scorer/)**
+**[打开免费在线工具 →](https://zhangzzc1994.github.io/side-hustle-scorer/)**
 
 ---
 
@@ -90,7 +90,7 @@
 无需构建，直接打开即可：
 
 ```bash
-git clone https://github.com/YOUR_USERNAME/side-hustle-scorer.git
+git clone https://github.com/zhangZZC1994/side-hustle-scorer.git
 cd side-hustle-scorer
 # 用浏览器打开 index.html
 ```
