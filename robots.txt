@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://zhangzzc1994.github.io/side-hustle-scorer/sitemap.xml
