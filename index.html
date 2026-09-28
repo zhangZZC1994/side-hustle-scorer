@@ -52,6 +52,8 @@ a{color:var(--accent)}
 .cta p{font-size:14px;margin-bottom:12px}
 .btn{display:inline-block;background:var(--accent);color:#fff;padding:10px 22px;border-radius:8px;text-decoration:none;font-size:14px;font-weight:500}
 .note{font-size:12px;color:var(--txt2);margin-top:10px}
+.btn-ghost{background:transparent;border:1px solid var(--accent);color:var(--accent);padding:8px 16px;border-radius:8px;font-size:13px;cursor:pointer;font-family:inherit}
+.btn-ghost:hover{background:var(--accent-bg)}
 </style>
 </head>
 <body>
@@ -90,6 +92,10 @@ a{color:var(--accent)}
     <div class="qa-q">关键一问：我停手一个月，它还在赚钱吗？</div>
     <div class="qa-a" id="qa">—</div>
   </div>
+  <div style="margin-top:14px">
+    <button id="copybtn" class="btn-ghost">复制我的评估结果</button>
+    <span id="copytip" style="font-size:12px;color:var(--txt2);margin-left:10px"></span>
+  </div>
 </div>
 
 <div class="card">
@@ -112,6 +118,9 @@ a{color:var(--accent)}
 </div>
 
 <script>
+const SITE = 'https://YOUR_USERNAME.github.io/side-hustle-scorer/';
+const PAY  = 'https://afdian.net/a/YOUR_ID';
+
 const DIMS = [
   {k:'cost',   n:'启动成本低',   w:1.0, hint:'需要投入的资金。越低越好，5 = 几乎零成本'},
   {k:'skill',  n:'技能匹配度',   w:1.5, hint:'你现有的能力能不能直接上手'},
@@ -184,6 +193,24 @@ function render(){
     </tr>`).join('');
 }
 render();
+
+document.getElementById('ctabtn').href = PAY;
+
+document.getElementById('copybtn').addEventListener('click', () => {
+  const nm = document.getElementById('pname').value.trim() || '我的副业项目';
+  const sc = document.getElementById('score').textContent;
+  const gr = document.getElementById('grade').textContent;
+  let weak = DIMS[0], wp = 99;
+  DIMS.forEach(d => { const p = state[d.k] / 5; if (p < wp) { wp = p; weak = d; } });
+  const txt = '我的副业「' + nm + '」评估结果：' + sc + ' 分（' + gr + '）\n'
+    + '最弱项：' + weak.n + ' ' + state[weak.k] + '/5 ｜ 复利潜力：' + state.compound + '/5\n'
+    + '免费自测 → ' + SITE;
+  const tip = document.getElementById('copytip');
+  navigator.clipboard.writeText(txt).then(() => {
+    tip.textContent = '已复制，去发帖或发给朋友吧';
+    setTimeout(() => tip.textContent = '', 3000);
+  }).catch(() => { tip.textContent = '复制失败，请手动选中'; });
+});
 </script>
 </body>
 </html>
