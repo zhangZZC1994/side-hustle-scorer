@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>副业项目评估器 · 免费在线打分</title>
+<meta name="description" content="8 维度加权打分，30 秒判断一个副业项目值不值得做。免费、无需注册、数据不上传。">
+<style>
+:root{
+  --bg:#F7F6F3; --card:#FFFFFF; --line:#E5E3DD; --txt:#2C2C2A;
+  --txt2:#5F5E5A; --accent:#1D9E75; --accent-bg:#E1F5EE;
+  --warn:#BA7517; --warn-bg:#FAEEDA; --bad:#A32D2D; --bad-bg:#FCEBEB;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--txt);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;line-height:1.6;padding:24px 16px 48px}
+.wrap{max-width:760px;margin:0 auto}
+header{margin-bottom:24px}
+h1{font-size:24px;font-weight:600;margin-bottom:8px}
+.sub{font-size:14px;color:var(--txt2)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:20px 24px;margin-bottom:16px}
+.name-row{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-bottom:4px}
+label.fld{display:block;font-size:13px;color:var(--txt2);margin-bottom:6px}
+input[type=text]{width:100%;max-width:420px;padding:10px 12px;border:1px solid var(--line);border-radius:8px;font-size:14px;background:#fff;color:var(--txt)}
+input[type=text]:focus{outline:2px solid var(--accent);outline-offset:-1px}
+.dim{margin-bottom:18px}
+.dim:last-child{margin-bottom:0}
+.dim-top{display:flex;justify-content:space-between;align-items:baseline;font-size:14px;margin-bottom:6px}
+.dim-name{font-weight:500}
+.dim-w{font-size:12px;color:var(--txt2)}
+.dim-hint{font-size:12px;color:var(--txt2);margin-top:4px}
+input[type=range]{width:100%;accent-color:var(--accent);margin:2px 0}
+.val{font-variant-numeric:tabular-nums;font-weight:600;color:var(--accent)}
+.result{background:var(--accent-bg);border-color:#9FE1CB}
+.score-row{display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+.big{font-size:44px;font-weight:600;line-height:1;font-variant-numeric:tabular-nums}
+.grade{font-size:14px;padding:4px 12px;border-radius:999px;background:var(--accent);color:#fff;font-weight:500}
+.verdict{font-size:14px;color:var(--txt2);margin-top:10px}
+.qa{margin-top:16px;padding-top:16px;border-top:1px solid #9FE1CB}
+.qa-q{font-size:14px;font-weight:500;margin-bottom:8px}
+.qa-a{font-size:14px;padding:8px 12px;border-radius:8px}
+.qa-a.good{background:#fff;color:var(--accent)}
+.qa-a.bad{background:var(--bad-bg);color:var(--bad)}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th,td{text-align:left;padding:8px 6px;border-bottom:1px solid var(--line)}
+th{color:var(--txt2);font-weight:500}
+td.n{text-align:right;font-variant-numeric:tabular-nums}
+.bar{height:6px;background:var(--accent);border-radius:3px}
+.bar-wrap{background:#F1EFE8;border-radius:3px;overflow:hidden}
+footer{font-size:13px;color:var(--txt2);text-align:center;margin-top:32px}
+a{color:var(--accent)}
+.cta{background:#FFF;border:1px solid var(--accent);text-align:center}
+.cta p{font-size:14px;margin-bottom:12px}
+.btn{display:inline-block;background:var(--accent);color:#fff;padding:10px 22px;border-radius:8px;text-decoration:none;font-size:14px;font-weight:500}
+.note{font-size:12px;color:var(--txt2);margin-top:10px}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+  <h1>副业项目评估器</h1>
+  <p class="sub">8 个维度加权打分，30 秒判断一个副业值不值得做。免费、无需注册，所有计算在你的浏览器里完成，数据不上传。</p>
+</header>
+
+<div class="card">
+  <div class="name-row">
+    <div style="flex:1;min-width:240px">
+      <label class="fld" for="pname">候选项目名称（可选）</label>
+      <input type="text" id="pname" placeholder="例如：小红书 AI 工具测评号">
+    </div>
+  </div>
+</div>
+
+<div class="card" id="dims"></div>
+
+<div class="card result">
+  <div class="score-row">
+    <div>
+      <div style="font-size:13px;color:var(--txt2)">加权总分</div>
+      <div class="big" id="score">0</div>
+    </div>
+    <div>
+      <div style="font-size:13px;color:var(--txt2);margin-bottom:6px">评级</div>
+      <span class="grade" id="grade">—</span>
+    </div>
+    <div style="flex:1;min-width:200px">
+      <div class="verdict" id="verdict">拖动上方滑块开始评估。</div>
+    </div>
+  </div>
+  <div class="qa">
+    <div class="qa-q">关键一问：我停手一个月，它还在赚钱吗？</div>
+    <div class="qa-a" id="qa">—</div>
+  </div>
+</div>
+
+<div class="card">
+  <h2 style="font-size:15px;font-weight:600;margin-bottom:12px">维度明细</h2>
+  <table>
+    <thead><tr><th>维度</th><th style="text-align:right">权重</th><th style="text-align:right">得分</th><th style="width:120px">贡献</th></tr></thead>
+    <tbody id="tbody"></tbody>
+  </table>
+</div>
+
+<div class="card cta">
+  <p>想要对比 3 个候选项目、追踪真实时薪和月度收入曲线？</p>
+  <a class="btn" href="#" id="ctabtn">获取完整版 Excel 工具包</a>
+  <p class="note">完整版含：3 项目横向对比、收入仪表盘、时间投入日志、18 条即用 AI 提示词。</p>
+</div>
+
+<footer>
+  免费工具 · 数据不上传 · 基于 <a href="https://github.com/chen103226/awesome-one-person-company">真实一人公司收入案例</a> 的 8 维度模型
+</footer>
+</div>
+
+<script>
+const DIMS = [
+  {k:'cost',   n:'启动成本低',   w:1.0, hint:'需要投入的资金。越低越好，5 = 几乎零成本'},
+  {k:'skill',  n:'技能匹配度',   w:1.5, hint:'你现有的能力能不能直接上手'},
+  {k:'time',   n:'时间弹性',     w:1.0, hint:'能否碎片化推进，是否必须整块时间'},
+  {k:'demand', n:'市场需求',     w:1.5, hint:'真的有人愿意为此付钱吗'},
+  {k:'compound',n:'复利潜力',    w:2.0, hint:'成果能否沉淀为资产，越做越轻松'},
+  {k:'compete',n:'竞争强度',     w:1.0, hint:'5 = 几乎没人做，1 = 红海'},
+  {k:'speed',  n:'变现速度',     w:1.0, hint:'多久能收到第一笔钱'},
+  {k:'sustain',n:'可持续性',     w:1.0, hint:'三年后这事儿还在不在'}
+];
+
+const state = {};
+DIMS.forEach(d => state[d.k] = 3);
+
+const dimsEl = document.getElementById('dims');
+dimsEl.innerHTML = DIMS.map(d => `
+  <div class="dim">
+    <div class="dim-top">
+      <span class="dim-name">${d.n}</span>
+      <span><span class="dim-w">权重 ${d.w.toFixed(1)}×</span> &nbsp;<span class="val" id="v_${d.k}">3</span></span>
+    </div>
+    <input type="range" min="1" max="5" step="1" value="3" data-k="${d.k}">
+    <div class="dim-hint">${d.hint}</div>
+  </div>`).join('');
+
+dimsEl.querySelectorAll('input[type=range]').forEach(r => {
+  r.addEventListener('input', e => {
+    state[e.target.dataset.k] = +e.target.value;
+    document.getElementById('v_' + e.target.dataset.k).textContent = e.target.value;
+    render();
+  });
+});
+
+function render(){
+  let sw = 0, max = 0;
+  DIMS.forEach(d => { sw += d.w; max += d.w * 5; });
+  let total = 0;
+  const rows = DIMS.map(d => {
+    const raw = state[d.k] * d.w;
+    total += raw;
+    return {d, raw, pct: raw / (d.w * 5)};
+  });
+  const score = Math.round(total / max * 100);
+  document.getElementById('score').textContent = score;
+
+  let grade, verdict;
+  if (score >= 80) { grade = 'A · 值得做'; verdict = '各项均衡且复利潜力强。别再犹豫，先做最小版本验证需求。'; }
+  else if (score >= 65) { grade = 'B · 可以做'; verdict = '基本成立，但有短板。看看得分最低的那一项能不能绕开或补上。'; }
+  else if (score >= 50) { grade = 'C · 谨慎'; verdict = '风险不小。要么调整方案，要么先当成练手项目，不要投入真金白银。'; }
+  else { grade = 'D · 不建议'; verdict = '多数关键维度不及格。这个方向大概率是消耗你，不是成就你。'; }
+  document.getElementById('grade').textContent = grade;
+  document.getElementById('verdict').textContent = verdict;
+
+  const cp = state.compound;
+  const qa = document.getElementById('qa');
+  if (cp >= 4) {
+    qa.className = 'qa-a good';
+    qa.textContent = '在。复利潜力得分 ' + cp + '/5，说明成果会沉淀成资产——这是值得长期投入的信号。';
+  } else {
+    qa.className = 'qa-a bad';
+    qa.textContent = '不在。复利潜力只有 ' + cp + '/5，停手即停收，本质是出卖时间。要么改造它的结构，要么换一个。';
+  }
+
+  document.getElementById('tbody').innerHTML = rows.map(r => `
+    <tr>
+      <td>${r.d.n}</td>
+      <td class="n">${r.d.w.toFixed(1)}×</td>
+      <td class="n">${state[r.d.k]} / 5</td>
+      <td><div class="bar-wrap"><div class="bar" style="width:${Math.round(r.pct*100)}%"></div></div></td>
+    </tr>`).join('');
+}
+render();
+</script>
+</body>
+</html>
