@@ -135,16 +135,31 @@ const DIMS = [
 const state = {};
 DIMS.forEach(d => state[d.k] = 3);
 
+// 从 URL 恢复分享进来的评分（自传播的关键机制）
+let sharedName = '';
+(function(){
+  const h = location.hash.slice(1);
+  if (!h) return;
+  const q = new URLSearchParams(h);
+  const v = q.get('v');
+  if (v && v.length === DIMS.length) {
+    DIMS.forEach((d, i) => { const n = +v[i]; if (n >= 1 && n <= 5) state[d.k] = n; });
+  }
+  sharedName = q.get('n') || '';
+})();
+
 const dimsEl = document.getElementById('dims');
 dimsEl.innerHTML = DIMS.map(d => `
   <div class="dim">
     <div class="dim-top">
       <span class="dim-name">${d.n}</span>
-      <span><span class="dim-w">权重 ${d.w.toFixed(1)}×</span> &nbsp;<span class="val" id="v_${d.k}">3</span></span>
+      <span><span class="dim-w">权重 ${d.w.toFixed(1)}×</span> &nbsp;<span class="val" id="v_${d.k}">${state[d.k]}</span></span>
     </div>
-    <input type="range" min="1" max="5" step="1" value="3" data-k="${d.k}">
+    <input type="range" min="1" max="5" step="1" value="${state[d.k]}" data-k="${d.k}">
     <div class="dim-hint">${d.hint}</div>
   </div>`).join('');
+
+if (sharedName) document.getElementById('pname').value = sharedName;
 
 dimsEl.querySelectorAll('input[type=range]').forEach(r => {
   r.addEventListener('input', e => {
@@ -191,10 +206,25 @@ function render(){
       <td class="n">${state[r.d.k]} / 5</td>
       <td><div class="bar-wrap"><div class="bar" style="width:${Math.round(r.pct*100)}%"></div></div></td>
     </tr>`).join('');
+
+  syncURL();
+}
+
+// 把当前评分写进 URL，任何人打开这个链接都能看到同一份结果
+function syncURL(){
+  const nameEl = document.getElementById('pname');
+  const nm = (nameEl && nameEl.value.trim()) || '';
+  let s = 'v=' + DIMS.map(d => state[d.k]).join('');
+  if (nm) s += '&n=' + encodeURIComponent(nm);
+  try {
+    history.replaceState(null, '', '#' + s);
+  } catch (e) {}
 }
 render();
 
 document.getElementById('ctabtn').href = PAY;
+
+document.getElementById('pname').addEventListener('input', syncURL);
 
 document.getElementById('copybtn').addEventListener('click', () => {
   const nm = document.getElementById('pname').value.trim() || '我的副业项目';
@@ -204,6 +234,7 @@ document.getElementById('copybtn').addEventListener('click', () => {
   DIMS.forEach(d => { const p = state[d.k] / 5; if (p < wp) { wp = p; weak = d; } });
   const txt = '我的副业「' + nm + '」评估结果：' + sc + ' 分（' + gr + '）\n'
     + '最弱项：' + weak.n + ' ' + state[weak.k] + '/5 ｜ 复利潜力：' + state.compound + '/5\n'
+    + '看我的完整打分 → ' + location.href + '\n'
     + '免费自测 → ' + SITE;
   const tip = document.getElementById('copytip');
   navigator.clipboard.writeText(txt).then(() => {
